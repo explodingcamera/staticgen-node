@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "outDir": "./lib",
+    "allowJs": true,
+    "declaration": true,
+    "rootDir": "src",
+    "esModuleInterop": true
+  },
+  "include": ["./src"]
+}
