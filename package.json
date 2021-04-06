@@ -18,7 +18,7 @@
   ],
   "scripts": {
     "build": "node ./build.js && tsc",
-    "prepack": "npm build"
+    "prepack": "npm run build"
   },
   "devDependencies": {
     "@types/node": "^14.14.37",
