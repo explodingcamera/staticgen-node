@@ -1,0 +1,40 @@
+diff --git a/staticgen.go b/staticgen.go
+index 3174604..63759e8 100644
+--- a/staticgen.go
++++ b/staticgen.go
+@@ -14,7 +14,6 @@ import (
+ 	"path/filepath"
+ 	"strings"
+ 	"sync"
+-	"syscall"
+ 	"time"
+ 
+ 	"github.com/apex/log"
+@@ -220,7 +219,7 @@ func (g *Generator) startCommand(ctx context.Context) error {
+ 	// start
+ 	g.cmd = exec.Command("sh", "-c", g.Command)
+ 	g.cmd.Env = append(os.Environ(), "STATICGEN=1")
+-	g.cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
++
+ 	g.cmd.Stdout = &g.out
+ 	g.cmd.Stderr = &g.out
+ 	err := g.cmd.Start()
+@@ -252,16 +251,8 @@ func (g *Generator) stopCommand(ctx context.Context) error {
+ 		return nil
+ 	}
+ 
+-	g.emit(EventStoppingServer{})
+-
+-	pgid, err := syscall.Getpgid(g.cmd.Process.Pid)
+-	if err != nil {
+-		return fmt.Errorf("getting process group id: %w", err)
+-	}
+-
+-	err = syscall.Kill(-pgid, syscall.SIGTERM)
+-	if err != nil {
+-		return fmt.Errorf("kill: %w", err)
++	if err := g.cmd.Process.Kill(); err != nil {
++		log.Fatalf("failed to kill process: %e", err)
+ 	}
+ 
+ 	_ = g.cmd.Wait()
