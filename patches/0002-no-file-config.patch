@@ -1,0 +1,73 @@
+diff --git a/cmd/staticgen/main.go b/cmd/staticgen/main.go
+index def98a4..410b86b 100644
+--- a/cmd/staticgen/main.go
++++ b/cmd/staticgen/main.go
+@@ -62,7 +62,40 @@ func main() {
+ func generateCmd(app *kingpin.Application) {
+ 	cmd := app.Command("generate", "Generate static website").Default()
+ 	timeout := cmd.Flag("timeout", "Timeout of website generation").Short('t').Default("15m").String()
++	conf := cmd.Flag("config", "Config path").Default("static.json").String()
++	dir := cmd.Flag("directory", "The static website output directory").Default("build").String()
++	url := cmd.Flag("url", "URL is the target website to crawl").Default("http://127.0.0.1:3000").String()
++	pages := cmd.Flag("pages", "Pages is a list of paths added to crawl").Strings()
++	concurrency := cmd.Flag("concurrency", "Concurrency is the number of concurrent pages to crawl").Default("30").Int()
++	allow404 := cmd.Flag("allow404", "Allow404 can be enabled to opt-in to pages resulting in a 404").Default("false").Bool()
++
+ 	cmd.Action(func(_ *kingpin.ParseContext) error {
++		var c staticgen.Config
++
++		if err := c.Load(*conf); err != nil {
++			return fmt.Errorf("loading configuration: %w", err)
++		}
++
++		if c.Dir == "build" {
++			c.Dir = *dir
++		}
++
++		if c.URL == "http://127.0.0.1:3000" {
++			c.URL = *url
++		}
++
++		if len(c.Pages) == 0 {
++			c.Pages = *pages
++		}
++
++		if !c.Allow404 {
++			c.Allow404 = *allow404
++		}
++
++		if c.Concurrency == 30 {
++			c.Concurrency = *concurrency
++		}
++
+ 		// generator
+ 		g := staticgen.Generator{
+ 			HTTPClient: client,
+@@ -94,7 +127,7 @@ func generateCmd(app *kingpin.Application) {
+ 		done := r.Report(events)
+ 
+ 		// start
+-		err = g.Run(ctx)
++		err = g.Run(ctx, c)
+ 		if err != nil {
+ 			return fmt.Errorf("crawling: %w", err)
+ 		}
+@@ -109,10 +142,17 @@ func generateCmd(app *kingpin.Application) {
+ func serveCmd(app *kingpin.Application) {
+ 	cmd := app.Command("serve", "Serve the generated website")
+ 	addr := cmd.Flag("address", "Bind address").Default("localhost:3000").String()
++	dir := cmd.Flag("directory", "The static website output directory").Default("build").String()
++	conf := cmd.Flag("config", "Config path").Default("static.json").String()
++
+ 	cmd.Action(func(_ *kingpin.ParseContext) error {
+ 		var c staticgen.Config
++		err := c.Load(*conf)
++
++		if c.Dir == "build" {
++			c.Dir = *dir
++		}
+ 
+-		err := c.Load("static.json")
+ 		if err != nil {
+ 			return fmt.Errorf("loading configuration: %w", err)
+ 		}
