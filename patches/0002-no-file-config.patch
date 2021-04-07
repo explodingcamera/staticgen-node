@@ -1,8 +1,8 @@
 diff --git a/cmd/staticgen/main.go b/cmd/staticgen/main.go
-index def98a4..410b86b 100644
+index def98a4..20900ab 100644
 --- a/cmd/staticgen/main.go
 +++ b/cmd/staticgen/main.go
-@@ -62,7 +62,40 @@ func main() {
+@@ -62,10 +62,44 @@ func main() {
  func generateCmd(app *kingpin.Application) {
  	cmd := app.Command("generate", "Generate static website").Default()
  	timeout := cmd.Flag("timeout", "Timeout of website generation").Short('t').Default("15m").String()
@@ -43,16 +43,11 @@ index def98a4..410b86b 100644
  		// generator
  		g := staticgen.Generator{
  			HTTPClient: client,
-@@ -94,7 +127,7 @@ func generateCmd(app *kingpin.Application) {
- 		done := r.Report(events)
- 
- 		// start
--		err = g.Run(ctx)
-+		err = g.Run(ctx, c)
- 		if err != nil {
- 			return fmt.Errorf("crawling: %w", err)
++			Config:     c,
  		}
-@@ -109,10 +142,17 @@ func generateCmd(app *kingpin.Application) {
+ 
+ 		// parse timeout
+@@ -109,10 +143,17 @@ func generateCmd(app *kingpin.Application) {
  func serveCmd(app *kingpin.Application) {
  	cmd := app.Command("serve", "Serve the generated website")
  	addr := cmd.Flag("address", "Bind address").Default("localhost:3000").String()

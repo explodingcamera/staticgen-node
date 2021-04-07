@@ -1,5 +1,5 @@
 diff --git a/staticgen.go b/staticgen.go
-index 3174604..63759e8 100644
+index 3174604..0f61739 100644
 --- a/staticgen.go
 +++ b/staticgen.go
 @@ -14,7 +14,6 @@ import (
@@ -10,7 +10,23 @@ index 3174604..63759e8 100644
  	"time"
  
  	"github.com/apex/log"
-@@ -220,7 +219,7 @@ func (g *Generator) startCommand(ctx context.Context) error {
+@@ -72,14 +71,9 @@ func (g *Generator) Run(ctx context.Context) error {
+ // Start loads configuration from ./static.json, starts the
+ // configured server, and begins the crawling process.
+ func (g *Generator) Start(ctx context.Context) error {
+-	// load configuration
+-	err := g.Config.Load("static.json")
+-	if err != nil {
+-		return fmt.Errorf("loading configuration: %w", err)
+-	}
+ 
+ 	// remove output dir
+-	err = os.RemoveAll(g.Dir)
++	err := os.RemoveAll(g.Dir)
+ 	if err != nil {
+ 		return fmt.Errorf("removing output directory: %w", err)
+ 	}
+@@ -220,7 +214,7 @@ func (g *Generator) startCommand(ctx context.Context) error {
  	// start
  	g.cmd = exec.Command("sh", "-c", g.Command)
  	g.cmd.Env = append(os.Environ(), "STATICGEN=1")
@@ -19,7 +35,7 @@ index 3174604..63759e8 100644
  	g.cmd.Stdout = &g.out
  	g.cmd.Stderr = &g.out
  	err := g.cmd.Start()
-@@ -252,16 +251,8 @@ func (g *Generator) stopCommand(ctx context.Context) error {
+@@ -252,16 +246,8 @@ func (g *Generator) stopCommand(ctx context.Context) error {
  		return nil
  	}
  
