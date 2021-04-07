@@ -1,31 +1,84 @@
 import { spawn } from "child_process";
-import { resolve } from "node:path";
+import { resolve } from "path";
 import binary from "./select-bin";
 
-export interface GenerateOptions {
+export interface BaseOptions {
+  /**
+   * When silent is enabled, the output of staticgen is not piped to stdout
+   */
   silent?: boolean;
+
+  /**
+   * When exitOnFail is enabled, the host process calling generate will also get terminated
+   */
   exitOnFail?: boolean;
-  dir?: string; // absolute path
+
+  /**
+   * current working directory
+   */
+  chdir?: string;
+}
+export interface GenerateOptions extends BaseOptions {
+  /**
+   * directory is the static website output directory. Defaults to "build".
+   */
+  directory?: string;
+
+  /**
+   * Timeout of website generation
+   */
   timeout?: string;
+
+  /**
+   * Allow404 can be enabled to opt-in to pages resulting in a 404,
+   * which otherwise lead to an error.
+   */
+  allow404?: boolean;
+
+  /**
+   * Concurrency is the number of concurrent pages to crawl. Defaults to 30.
+   */
+  concurrency?: number;
+
+  /**
+   * URL is the target website to crawl. Defaults to "http://127.0.0.1:3000".
+   */
+  url?: string;
+
+  /**
+   * Pages is a list of paths added to crawl, typically
+   * including unlinked pages such as error pages,
+   * landing pages and so on.
+   */
+  pages: string[];
 }
 
-export interface ServeOptions {
-  silent?: boolean;
-  exitOnFail?: boolean;
-  dir?: string; // absolute path
+export interface ServeOptions extends BaseOptions {
   address?: string;
 }
 
-export const generate = ({
-  silent = false,
-  exitOnFail = true,
-  dir = ".",
-  timeout = "1m",
-}: GenerateOptions = {}) => {
+export const generate = (
+  {
+    silent = false,
+    exitOnFail = true,
+    chdir = ".",
+    timeout = "1m",
+    directory = "build",
+    allow404 = false,
+    concurrency = 30,
+    url = "http://127.0.0.1:3000",
+    pages = [],
+  }: GenerateOptions = { pages: [] }
+) => {
   const child = spawn(binary, [
     "generate",
-    `--chdir="${resolve(dir)}"`,
+    `--chdir="${resolve(chdir)}"`,
     `--timeout="${timeout}"`,
+    `--directory="${directory}"`,
+    `--allow404="${allow404 ? "true" : "false"}"`,
+    `--concurrency="${concurrency}"`,
+    `--url="${url}"`,
+    `--pages="${pages.join(" ")}"`,
   ]);
 
   if (!silent) {
@@ -38,13 +91,13 @@ export const generate = ({
 
 export const serve = ({
   address = "localhost:3000",
-  dir = ".",
+  chdir = ".",
   exitOnFail = true,
   silent = false,
 }: ServeOptions = {}) => {
   const child = spawn(binary, [
     "serve",
-    `--chdir="${resolve(dir)}"`,
+    `--chdir="${resolve(chdir)}"`,
     `--address="${address}"`,
   ]);
 
