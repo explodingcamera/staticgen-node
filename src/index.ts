@@ -14,7 +14,7 @@ export interface BaseOptions {
   exitOnFail?: boolean;
 
   /**
-   * current working directory
+   * working directory
    */
   chdir?: string;
 }
@@ -72,14 +72,16 @@ export const generate = (
 ) => {
   const child = spawn(binary, [
     "generate",
-    `--chdir="${resolve(chdir)}"`,
+    `--chdir="${chdir}"`,
     `--timeout="${timeout}"`,
     `--directory="${directory}"`,
     `--allow404="${allow404 ? "true" : "false"}"`,
     `--concurrency="${concurrency}"`,
     `--url="${url}"`,
     `--pages="${pages.join(" ")}"`,
-  ]);
+  ], {
+    cwd: process.cwd(),
+  });
 
   if (!silent) {
     child.stderr.pipe(process.stderr);
