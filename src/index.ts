@@ -76,7 +76,7 @@ export const generate = (
     allow404 ? `--allow404` : "",
     `--concurrency=${concurrency}`,
     `--url=${url}`,
-    pages.length ? `--pages="${pages.join(" ")}"` : "",
+    ...pages.map(page => `--pages=${page}`)
   ], {
     cwd: cwd || process.cwd()
   });

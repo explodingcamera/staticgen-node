@@ -17,9 +17,11 @@ StaticGen-Node also includes a couple of small changes to staticgen to improve t
 ## Usage
 
 ### CLI
-This package adds a new binary called staticgen which can be used in package.json scripts and using  e.g `yarn run staticgen`
+This package adds a new binary called staticgen which can be used in package.json scripts and using e.g `yarn run staticgen`
 ### API
 This npm package also includes a JS API and typescript definitions. Currently, only synchronous functions are available, promise versions might be added later on.
+
+NOTE: the API can be a bit weird and is build around a specific usecase I have @ [snowstorm](https://github.com/explodingcamera/snowstorm).
 
 ```ts
 // ES-Modules
