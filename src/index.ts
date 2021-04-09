@@ -1,5 +1,4 @@
 import { spawn } from "child_process";
-import { resolve } from "path";
 import binary from "./select-bin";
 
 export interface BaseOptions {
@@ -16,7 +15,7 @@ export interface BaseOptions {
   /**
    * working directory
    */
-  chdir?: string;
+  cwd?: string;
 }
 export interface GenerateOptions extends BaseOptions {
   /**
@@ -61,7 +60,7 @@ export const generate = (
   {
     silent = false,
     exitOnFail = true,
-    chdir = ".",
+    cwd,
     timeout = "1m",
     directory = "build",
     allow404 = false,
@@ -72,15 +71,14 @@ export const generate = (
 ) => {
   const child = spawn(binary, [
     "generate",
-    `--chdir="${chdir}"`,
-    `--timeout="${timeout}"`,
-    `--directory="${directory}"`,
-    `--allow404="${allow404 ? "true" : "false"}"`,
-    `--concurrency="${concurrency}"`,
-    `--url="${url}"`,
-    `--pages="${pages.join(" ")}"`,
+    `--timeout=${timeout}`,
+    `--directory=${directory}`,
+    allow404 ? `--allow404` : "",
+    `--concurrency=${concurrency}`,
+    `--url=${url}`,
+    pages.length ? `--pages="${pages.join(" ")}"` : "",
   ], {
-    cwd: process.cwd(),
+    cwd: cwd || process.cwd()
   });
 
   if (!silent) {
@@ -92,16 +90,17 @@ export const generate = (
 };
 
 export const serve = ({
-  address = "localhost:3000",
-  chdir = ".",
+  address = "http://localhost:3000",
+  cwd,
   exitOnFail = true,
   silent = false,
 }: ServeOptions = {}) => {
   const child = spawn(binary, [
     "serve",
-    `--chdir="${resolve(chdir)}"`,
-    `--address="${address}"`,
-  ]);
+    `--address=${address}`,
+  ], {
+    cwd: cwd || process.cwd()
+  });
 
   if (!silent) {
     child.stderr.pipe(process.stderr);
